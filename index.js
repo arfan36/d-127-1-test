@@ -24,13 +24,16 @@ async function run() {
             const date = req.query.date;
             const query = {};
             const options = await appointmentOptionCollection.find(query).toArray();
+
+            // get the booking of the provided date
             const bookingQuery = { appointmentDate: date };
             const alreadyBooked = await bookingsCollection.find(bookingQuery).toArray();
             // code carefully
             options.forEach(option => {
                 const optionBooked = alreadyBooked.filter(book => book.treatment === option.name);
                 const bookedSlot = optionBooked.map(book => book.slot);
-                console.log('date, option.name, bookedSlot :>> ', date, option.name, bookedSlot);
+                const remainingSlots = option.slots.filter(slot => !bookedSlot.includes(slot));
+                option.slots = remainingSlots;
             });
             res.send(options);
         });
