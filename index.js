@@ -1,7 +1,7 @@
 const express = require('express');
 const cors = require('cors');
 require('dotenv').config();
-const jsonwebtoken = require('jsonwebtoken');
+const jwt = require('jsonwebtoken');
 const { MongoClient, ServerApiVersion } = require('mongodb');
 
 const app = express();
@@ -14,6 +14,18 @@ app.use(express.json());
 // mongoDb
 const uri = `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASSWORD}@clusterarfan36.opuzllc.mongodb.net/?retryWrites=true&w=majority`;
 const client = new MongoClient(uri, { useNewUrlParser: true, useUnifiedTopology: true, serverApi: ServerApiVersion.v1 });
+
+// jwt token
+function verifyJWT(req, rew, next) {
+    console.log('token inside VerifyJWT', req.headers.authorization);
+    const authHeader = req.headers.authorization;
+    if (!authHeader) {
+        return res.send(401).send('unauthorized access');
+    }
+
+    const token = authHeader.split(' ')[1];
+}
+
 
 async function run() {
     try {
@@ -114,8 +126,9 @@ async function run() {
         * app.delete('/bookings/:id')
          */
 
-        app.get('/bookings', async (req, res) => {
+        app.get('/bookings', verifyJWT, async (req, res) => {
             const email = req.query.email;
+
             const query = { email: email };
             const bookings = await bookingsCollection.find(query).toArray();
             res.send(bookings);
