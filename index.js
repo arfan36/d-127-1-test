@@ -1,7 +1,8 @@
 const express = require('express');
 const cors = require('cors');
-const { MongoClient, ServerApiVersion } = require('mongodb');
 require('dotenv').config();
+const jsonwebtoken = require('jsonwebtoken');
+const { MongoClient, ServerApiVersion } = require('mongodb');
 
 const app = express();
 const port = process.env.PORT || 5000;
@@ -20,6 +21,18 @@ async function run() {
         const bookingsCollection = client.db('doctorsPortal-D-124').collection('bookings');
         const usersCollection = client.db('doctorsPortal-D-124').collection('users');
 
+        app.get('/jwt', async (req, res) => {
+            const email = req.query.email;
+            const query = { email: email };
+            const user = await usersCollection.findOne(query);
+            if (user) {
+                const token = jwt.sign({ email }, process.env.ACCESS_TOKEN, { expiresIn: '1h' });
+                return res.send({ accessToken: token });
+            }
+            res.status(403).send({ accessToken: '' });
+        });
+
+        // save user info by insertOne
         app.post('/users', async (req, res) => {
             const user = req.body;
             console.log("🚀 ~ user", user);
