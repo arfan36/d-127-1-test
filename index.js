@@ -37,28 +37,11 @@ function verifyJWT(req, res, next) {
 
 async function run() {
     try {
+        // collection name
         const appointmentOptionCollection = client.db('doctorsPortal-D-124').collection('appointmentOptions');
         const bookingsCollection = client.db('doctorsPortal-D-124').collection('bookings');
         const usersCollection = client.db('doctorsPortal-D-124').collection('users');
 
-        app.get('/jwt', async (req, res) => {
-            const email = req.query.email;
-            const query = { email: email };
-            const user = await usersCollection.findOne(query);
-            if (user) {
-                const token = jwt.sign({ email }, process.env.ACCESS_TOKEN, { expiresIn: '7d' });
-                return res.send({ accessToken: token });
-            }
-            res.status(403).send({ accessToken: '' });
-        });
-
-        // save user info by insertOne
-        app.post('/users', async (req, res) => {
-            const user = req.body;
-            console.log("🚀 ~ user", user);
-            const result = await usersCollection.insertOne(user);
-            res.send(result);
-        });
 
         // Use Aggregate to query multiple collection and then merge data
         app.get('/appointmentOptions', async (req, res) => {
@@ -147,6 +130,7 @@ async function run() {
             res.send(bookings);
         });
 
+        // user booking
         app.post('/bookings', async (req, res) => {
             const booking = req.body;
             console.log("🚀 ~ booking", booking);
@@ -164,6 +148,33 @@ async function run() {
             }
 
             const result = await bookingsCollection.insertOne(booking);
+            res.send(result);
+        });
+
+        // create and send JWT token
+        app.get('/jwt', async (req, res) => {
+            const email = req.query.email;
+            const query = { email: email };
+            const user = await usersCollection.findOne(query);
+            if (user) {
+                const token = jwt.sign({ email }, process.env.ACCESS_TOKEN, { expiresIn: '7d' });
+                return res.send({ accessToken: token });
+            }
+            res.status(403).send({ accessToken: '' });
+        });
+
+        // read users info
+        app.get('/users', async (req, res) => {
+            const query = {};
+            const users = await usersCollection.find(query).toArray();
+            res.send(users);
+        });
+
+        // save user info by insertOne
+        app.post('/users', async (req, res) => {
+            const user = req.body;
+            console.log("🚀 ~ user", user);
+            const result = await usersCollection.insertOne(user);
             res.send(result);
         });
 
