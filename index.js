@@ -52,7 +52,7 @@ async function run() {
             // get the booking of the provided date
             const bookingQuery = { appointmentDate: date };
             const alreadyBooked = await bookingsCollection.find(bookingQuery).toArray();
-            // code carefully
+            // code carefully (target: get the remaining slot)
             options.forEach(option => {
                 const optionBooked = alreadyBooked.filter(book => book.treatment === option.name);
                 const bookedSlot = optionBooked.map(book => book.slot);
