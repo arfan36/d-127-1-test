@@ -41,6 +41,7 @@ async function run() {
         const appointmentOptionCollection = client.db('doctorsPortal-D-124').collection('appointmentOptions');
         const bookingsCollection = client.db('doctorsPortal-D-124').collection('bookings');
         const usersCollection = client.db('doctorsPortal-D-124').collection('users');
+        const doctorsCollection = client.db('doctorsPortal-D-124').collection('doctors');
 
 
         // Use Aggregate to query multiple collection and then merge data
@@ -211,6 +212,16 @@ async function run() {
                 }
             };
             const result = await usersCollection.updateOne(filter, updatedDoc, option);
+            res.send(result);
+        });
+
+        // Read all doctors
+        app.get('/doctors', async (req, res) => res.send(await doctorsCollection.find({}).toArray()));
+
+        // save doctors info by insertOne
+        app.post('/doctors', async (req, res) => {
+            const doctors = req.body;
+            const result = await doctorsCollection.insertOne(doctors);
             res.send(result);
         });
 
