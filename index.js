@@ -53,6 +53,7 @@ async function run() {
             // get the booking of the provided date
             const bookingQuery = { appointmentDate: date };
             const alreadyBooked = await bookingsCollection.find(bookingQuery).toArray();
+
             // code carefully (target: get the remaining slot)
             options.forEach(option => {
                 const optionBooked = alreadyBooked.filter(book => book.treatment === option.name);
@@ -222,6 +223,14 @@ async function run() {
         app.post('/doctors', async (req, res) => {
             const doctors = req.body;
             const result = await doctorsCollection.insertOne(doctors);
+            res.send(result);
+        });
+
+        // Delete (D) : delete one
+        app.delete('/doctors/:id', async (req, res) => {
+            const id = req.params.id;
+            const query = { _id: ObjectId(id) };
+            const result = await doctorsCollection.deleteOne(query);
             res.send(result);
         });
 
