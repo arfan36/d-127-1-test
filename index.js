@@ -43,6 +43,12 @@ async function run() {
         const usersCollection = client.db('doctorsPortal-D-124').collection('users');
         const doctorsCollection = client.db('doctorsPortal-D-124').collection('doctors');
 
+        // middleware
+        // NOTE: make sure you use verifyAdmin after verifyJWT
+        const verifyAdmin = (req, res, next) => {
+            console.log('inside verifyAdmin', req.decoded.email);
+            next();
+        };
 
         // Use Aggregate to query multiple collection and then merge data
         app.get('/appointmentOptions', async (req, res) => {
@@ -217,22 +223,23 @@ async function run() {
         });
 
         // Read all doctors
-        app.get('/doctors', async (req, res) => res.send(await doctorsCollection.find({}).toArray()));
+        app.get('/doctors', verifyJWT, verifyAdmin, async (req, res) => res.send(await doctorsCollection.find({}).toArray()));
 
         // save doctors info by insertOne
-        app.post('/doctors', async (req, res) => {
+        app.post('/doctors', verifyJWT, async (req, res) => {
             const doctors = req.body;
             const result = await doctorsCollection.insertOne(doctors);
             res.send(result);
         });
 
         // Delete (D) : delete one
-        app.delete('/doctors/:id', async (req, res) => {
+        app.delete('/doctors/:id', verifyJWT, async (req, res) => {
             const id = req.params.id;
-            const query = { _id: ObjectId(id) };
-            const result = await doctorsCollection.deleteOne(query);
+            const filter = { _id: ObjectId(id) };
+            const result = await doctorsCollection.deleteOne(filter);
             res.send(result);
         });
+
 
     }
     finally {
