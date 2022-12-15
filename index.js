@@ -78,6 +78,7 @@ async function run() {
             res.send(options);
         });
 
+        // advanced ServerApiVersion
         app.get('/v2/appointmentOptions', async (req, res) => {
             const date = req.query.date;
             const options = await appointmentOptionCollection.aggregate([
