@@ -104,6 +104,7 @@ async function run() {
                     $project: {
                         name: 1,
                         slots: 1,
+                        price: 1,
                         booked: {
                             $map: {
                                 input: '$booked',
@@ -116,6 +117,7 @@ async function run() {
                 {
                     $project: {
                         name: 1,
+                        price: 1,
                         slots: {
                             $setDifference: ['$slots', '$booked']
                         }
@@ -224,6 +226,20 @@ async function run() {
             const result = await usersCollection.updateOne(filter, updatedDoc, option);
             res.send(result);
         });
+
+        // temporary pto update price field on appointment options
+        // @ not recommended
+        // app.get('/addPrice', async (req, res) => {
+        //     const filter = {};
+        //     const options = { upsert: true };
+        //     const updatedDoc = {
+        //         $set: {
+        //             price: 98
+        //         }
+        //     };
+        //     const result = await appointmentOptionCollection.updateMany(filter, updatedDoc, options);
+        //     res.send(result);
+        // });
 
         // Read all doctors
         app.get('/doctors', verifyJWT, verifyAdmin, async (req, res) => res.send(await doctorsCollection.find({}).toArray()));
