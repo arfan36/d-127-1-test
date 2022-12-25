@@ -156,10 +156,18 @@ async function run() {
             res.send(bookings);
         });
 
+        // get specific booking info
+        app.get('/bookings/:bookingId', async (req, res) => {
+            const id = req.params.bookingId;
+            const query = { _id: ObjectId(id) };
+            const booking = await bookingsCollection.findOne(query);
+            res.send(booking);
+        });
+
         // user booking
         app.post('/bookings', async (req, res) => {
             const booking = req.body;
-            console.log("🚀 ~ booking", booking);
+            // console.log("🚀 ~ booking", booking);
             const query = {
                 appointmentDate: booking.appointmentDate,
                 email: booking.email,
@@ -207,7 +215,7 @@ async function run() {
         // save user info by insertOne
         app.post('/users', async (req, res) => {
             const user = req.body;
-            console.log("🚀 ~ user", user);
+            // console.log("🚀 ~ user", user);
             const result = await usersCollection.insertOne(user);
             res.send(result);
         });
@@ -227,6 +235,8 @@ async function run() {
             res.send(result);
         });
 
+
+
         // temporary pto update price field on appointment options
         // @ not recommended
         // app.get('/addPrice', async (req, res) => {
@@ -240,6 +250,14 @@ async function run() {
         //     const result = await appointmentOptionCollection.updateMany(filter, updatedDoc, options);
         //     res.send(result);
         // });
+
+        // app.get('/addPrice', async (req, res) => {
+        //     const filter = { email: { $regex: "ka@ka.com" } };
+        //     const result = await bookingsCollection.deleteMany(filter);
+        //     res.send(result);
+        // });
+
+
 
         // Read all doctors
         app.get('/doctors', verifyJWT, verifyAdmin, async (req, res) => res.send(await doctorsCollection.find({}).toArray()));
