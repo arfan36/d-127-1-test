@@ -43,6 +43,7 @@ async function run() {
         const bookingsCollection = client.db('doctorsPortal-D-124').collection('bookings');
         const usersCollection = client.db('doctorsPortal-D-124').collection('users');
         const doctorsCollection = client.db('doctorsPortal-D-124').collection('doctors');
+        const paymentsCollection = client.db('doctorsPortal-D-124').collection('payments');
 
         // middleware
         // NOTE: make sure you use verifyAdmin after verifyJWT
@@ -202,6 +203,22 @@ async function run() {
             res.send({
                 clientSecret: paymentIntent.client_secret,
             });
+        });
+
+        // payment
+        app.post('/payments', async (req, res) => {
+            const payment = req.body;
+            const result = await paymentsCollection.insertOne(payment);
+            const id = payment.bookingId;
+            const filter = { _id: ObjectId(id) };
+            const updateDoc = {
+                $set: {
+                    paid: true,
+                    transactionId: payment.transactionId
+                }
+            };
+            const updateResult = await bookingsCollection.updateOne(filter, updateDoc);
+            res.send(result);
         });
 
         // create and send JWT token
