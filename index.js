@@ -2,6 +2,7 @@ const express = require('express');
 const cors = require('cors');
 require('dotenv').config();
 const jwt = require('jsonwebtoken');
+const nodemailer = require('nodemailer');
 const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
 const stripe = require("stripe")(process.env.STRIPE_SECRET_KEY);
 
@@ -15,6 +16,17 @@ app.use(express.json());
 // mongoDb
 const uri = `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASSWORD}@clusterarfan36.opuzllc.mongodb.net/?retryWrites=true&w=majority`;
 const client = new MongoClient(uri, { useNewUrlParser: true, useUnifiedTopology: true, serverApi: ServerApiVersion.v1 });
+
+function sendBookingEmail(booking) {
+    let transporter = nodemailer.createTransport({
+        host: 'smtp.sendgrid.net',
+        port: 587,
+        auth: {
+            user: "apikey",
+            pass: process.env.SENDGRID_API_KEY
+        }
+    });
+}
 
 // jwt token middleware
 function verifyJWT(req, res, next) {
@@ -184,6 +196,9 @@ async function run() {
             }
 
             const result = await bookingsCollection.insertOne(booking);
+            // 
+            sendBookingEmail(booking);
+
             res.send(result);
         });
 
