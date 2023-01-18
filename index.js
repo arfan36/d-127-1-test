@@ -3,6 +3,7 @@ const cors = require('cors');
 require('dotenv').config();
 const jwt = require('jsonwebtoken');
 const nodemailer = require('nodemailer');
+const mg = require('nodemailer-mailgun-transport');
 const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
 const stripe = require("stripe")(process.env.STRIPE_SECRET_KEY);
 
@@ -19,14 +20,25 @@ const client = new MongoClient(uri, { useNewUrlParser: true, useUnifiedTopology:
 
 function sendBookingEmail(booking) {
     const { email, appointmentDate, treatment, slot } = booking;
-    let transporter = nodemailer.createTransport({
-        host: 'smtp.sendgrid.net',
-        port: 587,
+
+    const auth = {
         auth: {
-            user: "apikey",
-            pass: process.env.SENDGRID_API_KEY
+            api_key: process.env.EMAIL_SEND_KEY,
+            domain: process.env.EMAIL_SEND_DOMAIN
         }
-    });
+    };
+
+    const transporter = nodemailer.createTransport(mg(auth));
+
+
+    // let transporter = nodemailer.createTransport({
+    //     host: 'smtp.sendgrid.net',
+    //     port: 587,
+    //     auth: {
+    //         user: "apikey",
+    //         pass: process.env.SENDGRID_API_KEY
+    //     }
+    // });
 
     transporter.sendMail({
         from: "arfanur36@gmail.com", // verified sender email
@@ -44,7 +56,7 @@ function sendBookingEmail(booking) {
         `, // html body
     }, function (error, info) {
         if (error) {
-            console.log(error);
+            console.log("Email send error", error);
         } else {
             console.log('Email sent: ' + info.response);
         }
