@@ -18,6 +18,7 @@ const uri = `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASSWORD}@clu
 const client = new MongoClient(uri, { useNewUrlParser: true, useUnifiedTopology: true, serverApi: ServerApiVersion.v1 });
 
 function sendBookingEmail(booking) {
+    const { email, appointmentDate, treatment, slot } = booking;
     let transporter = nodemailer.createTransport({
         host: 'smtp.sendgrid.net',
         port: 587,
@@ -26,6 +27,29 @@ function sendBookingEmail(booking) {
             pass: process.env.SENDGRID_API_KEY
         }
     });
+
+    transporter.sendMail({
+        from: "arfanur36@gmail.com", // verified sender email
+        to: email, // recipient email
+        subject: `Your appointment for ${treatment} is confirmed`, // Subject line
+        text: "Hello world!", // plain text body
+        html: `
+        <h3>Your appointment is confirmed</h3>
+        <div>
+            <p>Your appointment for treatment : ${treatment}</p>
+            <p>Please visit us on ${appointmentDate} at ${slot}</p>
+            <p>Thanks from Doctors Portal.</p>
+        </div>
+        
+        `, // html body
+    }, function (error, info) {
+        if (error) {
+            console.log(error);
+        } else {
+            console.log('Email sent: ' + info.response);
+        }
+    });
+
 }
 
 // jwt token middleware
